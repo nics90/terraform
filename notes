@@ -1,0 +1,95 @@
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update && sudo apt-get install terraform
+mkdir learn-terraform-docker-container
+cd learn-terraform-docker-container
+
+
+----------
+
+main.tf
+------------------------
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.13.0"
+    }
+  }
+}
+
+provider "docker" {}
+
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = false
+}
+
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = "tutorial"
+  ports {
+    internal = 80
+    external = 8000
+  }
+}
+-----------------------------
+
+terraform init
+terraform plan
+terraform apply
+terraform destroy
+
+----------
+Terraform aws
+https://learn.hashicorp.com/tutorials/terraform/aws-build?in=terraform/aws-get-started
+
+aws --version
+-----------
+
+https://automateinfra.com/2021/03/22/how-to-launch-multiple-ec2-instances-on-aws-using-terraform/
+
+
+---
+
+# mkdir multivms
+# cd multivms
+
+echo 'resource "aws_instance" "nics-machine" {
+   count = 4   # Here we are creating identical 4 machines. 
+   ami = var.ami
+   instance_type = var.instance_type
+   tags = {
+      Name = "nics-machine-${count.index}"
+           }
+}' > main.tf
+
+
+echo '# Creating a Variable for ami
+variable "ami" {       
+  type = string
+}
+ 
+# Creating a Variable for instance_type
+variable "instance_type" {    
+  type = string
+}' > vars.tf
+
+
+echo '
+ami = "ami-0742a572c2ce45ebf"
+instance_type = "t2.micro" ' > terraform.tfvars 
+
+echo 'output "ec2_machines" {
+ # Here * indicates that there are more than one arn because count is 4   
+  value = aws_instance.nics-machine.*.arn 
+}' > outputs.tf
+
+echo 'provider "aws" {
+  region = "us-east-2"
+}' > provider.tf
+
+
+
+
