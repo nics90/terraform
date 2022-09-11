@@ -48,10 +48,7 @@ https://learn.hashicorp.com/tutorials/terraform/aws-build?in=terraform/aws-get-s
 aws --version
 -----------
 
-https://automateinfra.com/2021/03/22/how-to-launch-multiple-ec2-instances-on-aws-using-terraform/
 
-
----
 
 # mkdir multivms
 # cd multivms
